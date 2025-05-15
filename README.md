@@ -7,7 +7,7 @@
 
 A deep learning-powered web application that accurately classifies food images as pizza, steak, or sushi using a custom CNN architecture trained on the Food-101 dataset.
 
-![Food Vision Demo](demo_screenshot.png)
+![Food Vision Demo](demo.png)
 
 ## Project Overview
 
