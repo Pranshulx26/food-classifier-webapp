@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Image Classifier</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-lg my-5">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="text-center mb-0">Food Image Classifier</h2>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-center lead">Upload an image of pizza, steak, or sushi to classify it</p>
+                        
+                        <!-- Upload Form -->
+                        <form id="upload-form" class="mb-4">
+                            <div class="mb-3">
+                                <label for="image-upload" class="form-label">Select an image:</label>
+                                <input type="file" class="form-control" id="image-upload" name="file" accept="image/jpeg, image/png">
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">Classify Image</button>
+                            </div>
+                        </form>
+                        
+                        <!-- Loading Spinner -->
+                        <div id="loading" class="text-center my-3 d-none">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Processing your image...</p>
+                        </div>
+                        
+                        <!-- Error Alert -->
+                        <div id="error-container" class="alert alert-danger d-none" role="alert"></div>
+                        
+                        <!-- Results Container -->
+                        <div id="results-container" class="d-none">
+                            <h3 class="text-center mb-3">Classification Results</h3>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div id="image-container" class="text-center mb-3">
+                                        <img id="uploaded-image" class="img-fluid rounded" alt="Uploaded food image">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div id="prediction-container" class="result-box p-3 text-center">
+                                        <h4>Prediction:</h4>
+                                        <p id="prediction-text" class="prediction-text mb-2"></p>
+                                        <div class="progress mb-3">
+                                            <div id="confidence-bar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                        <p>Confidence: <span id="confidence-text">0%</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2 mt-3">
+                                <button id="try-again-btn" class="btn btn-secondary">Try Another Image</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadForm = document.getElementById('upload-form');
+            const imageUpload = document.getElementById('image-upload');
+            const loading = document.getElementById('loading');
+            const errorContainer = document.getElementById('error-container');
+            const resultsContainer = document.getElementById('results-container');
+            const uploadedImage = document.getElementById('uploaded-image');
+            const predictionText = document.getElementById('prediction-text');
+            const confidenceBar = document.getElementById('confidence-bar');
+            const confidenceText = document.getElementById('confidence-text');
+            const tryAgainBtn = document.getElementById('try-again-btn');
+            
+            uploadForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Check if a file was selected
+                if (!imageUpload.files || imageUpload.files.length === 0) {
+                    showError('Please select an image file.');
+                    return;
+                }
+                
+                const file = imageUpload.files[0];
+                
+                // Check file type
+                if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
+                    showError('Please select a JPEG or PNG image.');
+                    return;
+                }
+                
+                // Create form data
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                // Hide error and results, show loading
+                errorContainer.classList.add('d-none');
+                resultsContainer.classList.add('d-none');
+                loading.classList.remove('d-none');
+                
+                // Submit the form via AJAX
+                fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            throw new Error(data.error || 'An error occurred during prediction.');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Process successful response
+                    loading.classList.add('d-none');
+                    
+                    // Display the uploaded image
+                    uploadedImage.src = '/' + data.image_path;
+                    
+                    // Set prediction text with appropriate styling
+                    if (data.prediction === "Image not classified") {
+                        predictionText.textContent = "Not Classified";
+                        predictionText.className = "prediction-text text-warning";
+                    } else if (data.prediction === "Error processing image") {
+                        predictionText.textContent = "Error";
+                        predictionText.className = "prediction-text text-danger";
+                    } else {
+                        predictionText.textContent = data.prediction.toUpperCase();
+                        predictionText.className = "prediction-text text-success";
+                    }
+                    
+                    // Update confidence bar and text
+                    confidenceBar.style.width = data.confidence + '%';
+                    confidenceText.textContent = data.confidence + '%';
+                    
+                    // Set appropriate progress bar color based on confidence
+                    if (data.confidence < 50) {
+                        confidenceBar.className = "progress-bar bg-danger";
+                    } else if (data.confidence < 75) {
+                        confidenceBar.className = "progress-bar bg-warning";
+                    } else {
+                        confidenceBar.className = "progress-bar bg-success";
+                    }
+                    
+                    // Show results
+                    resultsContainer.classList.remove('d-none');
+                })
+                .catch(error => {
+                    loading.classList.add('d-none');
+                    showError(error.message);
+                });
+            });
+            
+            // Function to display errors
+            function showError(message) {
+                errorContainer.textContent = message;
+                errorContainer.classList.remove('d-none');
+            }
+            
+            // "Try Again" button event handler
+            tryAgainBtn.addEventListener('click', function() {
+                // Reset the form
+                uploadForm.reset();
+                // Hide results and errors
+                resultsContainer.classList.add('d-none');
+                errorContainer.classList.add('d-none');
+            });
+        });
+    </script>
+</body>
+</html>
