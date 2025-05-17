@@ -70,7 +70,7 @@ def predict():
         # Check if model is loaded
         if model is None:
             return jsonify({
-                'error': 'Model not loaded. Please place food_03.pth in the model directory.'
+                'error': 'Model not loaded. Please place food_03_transfer.pth in the model directory.'
             }), 500
         
         # Make prediction
