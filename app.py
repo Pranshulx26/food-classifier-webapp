@@ -20,7 +20,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 
 # Load the model at startup
-MODEL_PATH = os.path.join('model', 'food_03.pth')
+MODEL_PATH = os.path.join('model', 'food_03_transfer.pth')
 print("Absolute MODEL_PATH:", os.path.abspath(MODEL_PATH))
 print("Exists:", os.path.isfile(MODEL_PATH))
 
