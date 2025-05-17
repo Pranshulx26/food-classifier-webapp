@@ -3,73 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Food Image Classifier</title>
+    <title>Food Vision - AI Food Classifier</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card shadow-lg my-5">
-                    <div class="card-header bg-primary text-white">
-                        <h2 class="text-center mb-0">Food Image Classifier</h2>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-12 text-center">
+                        <h1 class="app-title"><i class="fa-solid fa-utensils"></i> Food Vision</h1>
+                        <p class="app-subtitle">AI-powered food classification</p>
                     </div>
-                    <div class="card-body">
-                        <p class="text-center lead">Upload an image of pizza, steak, or sushi to classify it</p>
-                        
-                        <!-- Upload Form -->
-                        <form id="upload-form" class="mb-4">
-                            <div class="mb-3">
-                                <label for="image-upload" class="form-label">Select an image:</label>
-                                <input type="file" class="form-control" id="image-upload" name="file" accept="image/jpeg, image/png">
-                            </div>
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">Classify Image</button>
-                            </div>
-                        </form>
-                        
-                        <!-- Loading Spinner -->
-                        <div id="loading" class="text-center my-3 d-none">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <p class="mt-2">Processing your image...</p>
-                        </div>
-                        
-                        <!-- Error Alert -->
-                        <div id="error-container" class="alert alert-danger d-none" role="alert"></div>
-                        
-                        <!-- Results Container -->
-                        <div id="results-container" class="d-none">
-                            <h3 class="text-center mb-3">Classification Results</h3>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div id="image-container" class="text-center mb-3">
-                                        <img id="uploaded-image" class="img-fluid rounded" alt="Uploaded food image">
-                                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-10 col-lg-8">
+                    <div class="app-card">
+                        <div class="card-body">
+                            <div class="intro-section text-center mb-4">
+                                <div class="food-icons">
+                                    <span class="food-icon"><i class="fa-solid fa-pizza-slice"></i></span>
+                                    <span class="food-icon"><i class="fa-solid fa-drumstick-bite"></i></span>
+                                    <span class="food-icon"><i class="fa-solid fa-fish"></i></span>
                                 </div>
-                                <div class="col-md-6">
-                                    <div id="prediction-container" class="result-box p-3 text-center">
-                                        <h4>Prediction:</h4>
-                                        <p id="prediction-text" class="prediction-text mb-2"></p>
-                                        <div class="progress mb-3">
-                                            <div id="confidence-bar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                <h2 class="section-title">What's on your plate?</h2>
+                                <p class="section-description">
+                                    Upload an image of pizza, steak, or sushi and let our AI identify it for you.
+                                    Our model is trained on thousands of food images for accurate results.
+                                </p>
+                            </div>
+                            
+                            <!-- Upload Section -->
+                            <div id="upload-section" class="upload-section">
+                                <form id="upload-form" class="mb-4">
+                                    <div class="file-upload-container">
+                                        <label for="image-upload" class="file-upload-label">
+                                            <div class="upload-icon">
+                                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                            </div>
+                                            <div class="upload-text">
+                                                <span class="primary-text">Click to upload an image</span>
+                                                <span class="secondary-text">or drag and drop (JPEG, PNG)</span>
+                                            </div>
+                                        </label>
+                                        <input type="file" class="form-control" id="image-upload" name="file" accept="image/jpeg, image/png">
+                                    </div>
+                                    <div class="d-grid mt-3">
+                                        <button type="submit" class="btn btn-primary classify-btn">
+                                            <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Classify Image
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                            
+                            <!-- Loading Spinner -->
+                            <div id="loading" class="text-center my-5 d-none">
+                                <div class="spinner-container">
+                                    <div class="spinner"></div>
+                                </div>
+                                <p class="mt-3 loading-text">Analyzing your food image...</p>
+                            </div>
+                            
+                            <!-- Error Alert -->
+                            <div id="error-container" class="alert alert-danger d-none" role="alert">
+                                <i class="fa-solid fa-circle-exclamation me-2"></i>
+                                <span id="error-message"></span>
+                            </div>
+                            
+                            <!-- Results Container -->
+                            <div id="results-container" class="d-none">
+                                <h3 class="results-title text-center">
+                                    <i class="fa-solid fa-chart-simple me-2"></i>Classification Results
+                                </h3>
+                                
+                                <div class="results-content">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div id="image-container" class="image-preview-container">
+                                                <img id="uploaded-image" class="image-preview" alt="Uploaded food image">
+                                            </div>
                                         </div>
-                                        <p>Confidence: <span id="confidence-text">0%</span></p>
+                                        <div class="col-md-6">
+                                            <div id="prediction-container" class="prediction-container">
+                                                <h4 class="prediction-label">AI Prediction:</h4>
+                                                <div class="prediction-result">
+                                                    <div id="prediction-icon" class="prediction-icon">
+                                                        <i class="fa-solid fa-pizza-slice"></i>
+                                                    </div>
+                                                    <p id="prediction-text" class="prediction-text"></p>
+                                                </div>
+                                                
+                                                <div class="confidence-section">
+                                                    <h5>Confidence Score:</h5>
+                                                    <div class="progress confidence-progress">
+                                                        <div id="confidence-bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                    <p class="confidence-text">Confidence: <span id="confidence-text">0%</span></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2 mt-4">
+                                        <button id="try-again-btn" class="btn btn-secondary try-again-btn">
+                                            <i class="fa-solid fa-rotate me-2"></i>Try Another Image
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-                            <div class="d-grid gap-2 mt-3">
-                                <button id="try-again-btn" class="btn btn-secondary">Try Another Image</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Technical Info -->
+                    <div class="tech-info mt-4">
+                        <div class="tech-info-toggle" data-bs-toggle="collapse" data-bs-target="#techDetails">
+                            <i class="fa-solid fa-circle-info me-2"></i>Technical Details
+                            <i class="fa-solid fa-chevron-down ms-2"></i>
+                        </div>
+                        <div id="techDetails" class="collapse tech-info-content">
+                            <p>This application uses a fine-tuned EfficientNet-B0 model achieving 92% accuracy in food classification. The model was trained using transfer learning techniques on a dataset of pizza, steak, and sushi images.</p>
+                            <div class="tech-badges">
+                                <span class="tech-badge"><i class="fa-brands fa-python me-1"></i>Python</span>
+                                <span class="tech-badge"><i class="fa-solid fa-brain me-1"></i>PyTorch</span>
+                                <span class="tech-badge"><i class="fa-solid fa-server me-1"></i>Flask</span>
+                                <span class="tech-badge"><i class="fa-brands fa-bootstrap me-1"></i>Bootstrap</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
+        
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="container text-center">
+                <p>Food Vision - AI Food Classifier &copy; 2025 | Built with <i class="fa-solid fa-heart"></i> and Deep Learning</p>
+                <div class="social-links">
+                    <a href="https://github.com/Pranshulx26/food-classifier-webapp" target="_blank" class="social-link">
+                        <i class="fa-brands fa-github"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                        <i class="fa-brands fa-linkedin"></i>
+                    </a>
+                </div>
+            </div>
+        </footer>
     </div>
 
     <!-- Bootstrap JS -->
@@ -81,13 +174,69 @@
             const imageUpload = document.getElementById('image-upload');
             const loading = document.getElementById('loading');
             const errorContainer = document.getElementById('error-container');
+            const errorMessage = document.getElementById('error-message');
             const resultsContainer = document.getElementById('results-container');
             const uploadedImage = document.getElementById('uploaded-image');
             const predictionText = document.getElementById('prediction-text');
+            const predictionIcon = document.getElementById('prediction-icon');
             const confidenceBar = document.getElementById('confidence-bar');
             const confidenceText = document.getElementById('confidence-text');
             const tryAgainBtn = document.getElementById('try-again-btn');
+            const uploadSection = document.getElementById('upload-section');
             
+            // Drag and drop functionality
+            const fileUploadLabel = document.querySelector('.file-upload-label');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                fileUploadLabel.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                fileUploadLabel.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                fileUploadLabel.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                fileUploadLabel.classList.add('highlight');
+            }
+            
+            function unhighlight() {
+                fileUploadLabel.classList.remove('highlight');
+            }
+            
+            fileUploadLabel.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files && files.length) {
+                    imageUpload.files = files;
+                    // Visual feedback that file was selected
+                    const fileName = files[0].name;
+                    const uploadText = fileUploadLabel.querySelector('.upload-text');
+                    uploadText.innerHTML = `<span class="file-selected">${fileName}</span>`;
+                }
+            }
+            
+            // File input change event
+            imageUpload.addEventListener('change', function() {
+                if (this.files && this.files.length) {
+                    const fileName = this.files[0].name;
+                    const uploadText = fileUploadLabel.querySelector('.upload-text');
+                    uploadText.innerHTML = `<span class="file-selected">${fileName}</span>`;
+                }
+            });
+            
+            // Form submission
             uploadForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
@@ -112,6 +261,7 @@
                 // Hide error and results, show loading
                 errorContainer.classList.add('d-none');
                 resultsContainer.classList.add('d-none');
+                uploadSection.classList.add('d-none');
                 loading.classList.remove('d-none');
                 
                 // Submit the form via AJAX
@@ -134,21 +284,31 @@
                     // Display the uploaded image
                     uploadedImage.src = '/' + data.image_path;
                     
-                    // Set prediction text with appropriate styling
+                    // Set prediction text and icon with appropriate styling
                     if (data.prediction === "Image not classified") {
                         predictionText.textContent = "Not Classified";
-                        predictionText.className = "prediction-text text-warning";
+                        predictionText.className = "prediction-text not-classified";
+                        predictionIcon.innerHTML = '<i class="fa-solid fa-question"></i>';
                     } else if (data.prediction === "Error processing image") {
                         predictionText.textContent = "Error";
-                        predictionText.className = "prediction-text text-danger";
+                        predictionText.className = "prediction-text error";
+                        predictionIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
                     } else {
                         predictionText.textContent = data.prediction.toUpperCase();
-                        predictionText.className = "prediction-text text-success";
+                        predictionText.className = "prediction-text success";
+                        
+                        // Set appropriate icon based on prediction
+                        if (data.prediction.toLowerCase() === "pizza") {
+                            predictionIcon.innerHTML = '<i class="fa-solid fa-pizza-slice"></i>';
+                        } else if (data.prediction.toLowerCase() === "steak") {
+                            predictionIcon.innerHTML = '<i class="fa-solid fa-drumstick-bite"></i>';
+                        } else if (data.prediction.toLowerCase() === "sushi") {
+                            predictionIcon.innerHTML = '<i class="fa-solid fa-fish"></i>';
+                        }
                     }
                     
-                    // Update confidence bar and text
-                    confidenceBar.style.width = data.confidence + '%';
-                    confidenceText.textContent = data.confidence + '%';
+                    // Add animation class to trigger CSS animation
+                    predictionText.classList.add('animate-prediction');
                     
                     // Set appropriate progress bar color based on confidence
                     if (data.confidence < 50) {
@@ -159,28 +319,56 @@
                         confidenceBar.className = "progress-bar bg-success";
                     }
                     
+                    // Update confidence bar and text immediately
+                    confidenceBar.style.width = data.confidence + '%';
+                    confidenceText.textContent = data.confidence + '%';
+                    
                     // Show results
                     resultsContainer.classList.remove('d-none');
                 })
                 .catch(error => {
                     loading.classList.add('d-none');
+                    uploadSection.classList.remove('d-none');
                     showError(error.message);
                 });
             });
             
             // Function to display errors
             function showError(message) {
-                errorContainer.textContent = message;
+                errorMessage.textContent = message;
                 errorContainer.classList.remove('d-none');
+                
+                // Hide error after 5 seconds
+                setTimeout(() => {
+                    errorContainer.classList.add('d-none');
+                }, 5000);
             }
             
             // "Try Again" button event handler
             tryAgainBtn.addEventListener('click', function() {
                 // Reset the form
                 uploadForm.reset();
-                // Hide results and errors
+                const uploadText = fileUploadLabel.querySelector('.upload-text');
+                uploadText.innerHTML = `
+                    <span class="primary-text">Click to upload an image</span>
+                    <span class="secondary-text">or drag and drop (JPEG, PNG)</span>
+                `;
+                
+                // Hide results and errors, show upload section
                 resultsContainer.classList.add('d-none');
                 errorContainer.classList.add('d-none');
+                uploadSection.classList.remove('d-none');
+                
+                // Reset confidence bar
+                confidenceBar.style.width = "0%";
+                confidenceText.textContent = "0%";
+            });
+            
+            // Animate elements on page load
+            document.querySelectorAll('.food-icon').forEach((icon, index) => {
+                setTimeout(() => {
+                    icon.classList.add('animate-icon');
+                }, index * 200);
             });
         });
     </script>
