@@ -1,4 +1,4 @@
-# 🍕 Food-Vision: Advanced Deep Learning Food Classifier with Web Interface
+# 🍕 Food-Vision: Deep Learning Food Classifier with Web Interface
 
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0.1-EE4C2C.svg)](https://pytorch.org/)
@@ -8,6 +8,7 @@
 A state-of-the-art deep learning web application that accurately classifies food images as pizza, steak, or sushi using transfer learning with ConvNeXt-Tiny architecture, achieving over 98% accuracy on test data.
 
 ![Food Vision Demo](demo.png)
+![Food Vision Demo](demo2.png)
 
 ## Project Overview
 
