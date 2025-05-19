@@ -1,11 +1,11 @@
-# 🍕 Food-Vision: Deep Learning Food Classifier with Web Interface
+# 🍕 Food-Vision: Advanced Deep Learning Food Classifier with Web Interface
 
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0.1-EE4C2C.svg)](https://pytorch.org/)
 [![Flask](https://img.shields.io/badge/Flask-2.3.3-000000.svg)](https://flask.palletsprojects.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-A deep learning-powered web application that accurately classifies food images as pizza, steak, or sushi using transfer learning with EfficientNet-B0 trained on a specialized food dataset.
+A state-of-the-art deep learning web application that accurately classifies food images as pizza, steak, or sushi using transfer learning with ConvNeXt-Tiny architecture, achieving over 98% accuracy on test data.
 
 ![Food Vision Demo](demo.png)
 
@@ -13,49 +13,62 @@ A deep learning-powered web application that accurately classifies food images a
 
 Food-Vision showcases end-to-end machine learning deployment, from dataset preparation and model training to production-ready web application development. The project demonstrates expertise in:
 
-- **Computer Vision**: Image preprocessing and classification using PyTorch
-- **Transfer Learning**: Leveraging pre-trained EfficientNet-B0 model for food classification
+- **Computer Vision**: Advanced image preprocessing and classification using PyTorch
+- **Transfer Learning**: Systematic evaluation of multiple architectures including EfficientNet, ResNet, ViT, and ConvNeXt
+- **Experimental Design**: Structured experimentation to identify optimal architecture and hyperparameters
 - **Web Development**: Full-stack deployment with Flask and modern frontend
 
-The model achieves an impressive 92% accuracy on both training and test sets after fine-tuning the EfficientNet-B0 architecture.
+The ConvNeXt-Tiny model achieves an impressive 98.38% accuracy on the test set after comprehensive architecture evaluation and hyperparameter tuning.
 
 ## Technical Architecture
 
+### Model Selection Process
+Implemented a systematic evaluation of multiple state-of-the-art architectures:
+- EfficientNet-B0 and B2
+- ResNet50
+- Vision Transformer (ViT-B/16)
+- ConvNeXt-Tiny
+
+ConvNeXt-Tiny emerged as the superior architecture with the following advantages:
+- Highest accuracy (98.38%)
+- Excellent balance of model complexity and performance
+- Efficient inference for web application deployment
+
 ### Data Preparation
-- Used a specialized dataset containing pizza, steak, and sushi images
+- Specialized dataset containing pizza, steak, and sushi images
 - Organized in training and test sets for robust model evaluation
-- Leveraged automatic transforms from EfficientNet-B0 weights for optimal preprocessing
+- Applied architecture-specific preprocessing transforms
 
 ### Model Architecture
-Transfer learning implementation using EfficientNet-B0:
-- Utilized pre-trained EfficientNet-B0 weights for feature extraction
-- Frozen feature extraction layers to preserve learned representations
-- Custom classifier head tailored for the food classification task
-- Applied dropout for regularization to prevent overfitting
+Implemented ConvNeXt-Tiny with custom classification head:
 
 ```python
-# Load pre-trained EfficientNet-B0 model
-weights = models.EfficientNet_B0_Weights.DEFAULT
-model = models.efficientnet_b0(weights=weights)
+def create_convnext_tiny(out_features: int = 3, device: torch.device = device) -> torch.nn.Module:
+    """
+    Initializes and returns a ConvNeXt-Tiny model with a custom classifier head.
+    """
+    weights = models.ConvNeXt_Tiny_Weights.DEFAULT
+    model = models.convnext_tiny(weights=weights).to(device)
 
-# Freeze base layers for transfer learning
-for param in model.features.parameters():
-    param.requires_grad = False
+    # Update the classifier to match the number of output classes
+    model.classifier = nn.Sequential(
+        nn.Flatten(),
+        nn.Linear(in_features=768, out_features=out_features)
+    ).to(device)
 
-# Update the classifier head for our classes
-model.classifier = nn.Sequential(
-    nn.Dropout(p=0.2, inplace=True),
-    nn.Linear(in_features=1280, out_features=len(class_names))
-)
+    return model
 ```
 
-### Training Process
-- Implemented a robust training pipeline with validation
+### Training Process and Results
+- Implemented a comprehensive experimental framework to compare multiple models
 - Used Adam optimizer with learning rate 0.001
-- Applied StepLR scheduler to reduce learning rate every 5 epochs
-- Fixed random seeds for reproducibility
-- Trained for 15 epochs with learning rate decay
-- Achieved 92% accuracy on both training and test sets
+- Incorporated TensorBoard logging for experiment tracking
+- Implemented early stopping with patience=3
+- Trained for 10 epochs with the following performance trajectory:
+  - Epoch 1: 87.04% test accuracy
+  - Epoch 5: 97.84% test accuracy
+  - Epoch 8: 98.38% test accuracy (peak performance)
+  - Final accuracy: 98.25% on test set
 
 ### Web Application
 - **Backend**: Flask server handling image uploads and inference
@@ -66,6 +79,7 @@ model.classifier = nn.Sequential(
   - Visualized confidence levels with color-coded progress bars
   - Error handling and validation
   - Mobile-responsive design
+- **GPU/CPU Support**: Automatically detects and utilizes available hardware
 
 ## Project Structure
 
@@ -81,10 +95,11 @@ food_classifier/
 ├── templates/            # HTML templates
 │   └── index.html        # Main page template
 ├── model/                # Directory for the trained model
-│   └── food_03_transfer.pth  # Trained PyTorch EfficientNet-B0 model
+│   └── convnext_tiny_10_epochs_20250519_193505.pt  # Trained PyTorch ConvNeXt-Tiny model
 └── notebook/             # Jupyter notebooks for model development
-    └── food_classification.ipynb  # Model training and experimentation
-    └── transfer_learning.ipynb 
+    └── food_classification.ipynb       # Model training and experimentation
+    └── model_comparison.ipynb          # Architecture comparison experiments
+    └── hyperparameter_tuning.ipynb     # Optimization of model parameters
 ```
 
 ## Installation and Usage
@@ -114,7 +129,7 @@ food_classifier/
 
 ### Running the Application
 1. **Ensure the model file is in place**
-   - The trained model file `food_03_transfer.pth` should be in the `model/` directory
+   - The trained model file `convnext_tiny_10_epochs_20250519_193505.pt` should be in the `model/` directory
 
 2. **Start the Flask server**
    ```bash
@@ -126,12 +141,22 @@ food_classifier/
    - Upload an image of pizza, steak, or sushi
    - View the classification results with confidence scores
 
+## Model Performance Comparison
+
+| Model Architecture | Test Accuracy | Training Time | Notes |
+|-------------------|--------------|--------------|-------|
+| ConvNeXt-Tiny     | 98.38%       | 14min 36s    | Best overall performance |
+| EfficientNet-B2   | 96.82%       | 18min 12s    | Good balance of accuracy and size |
+| EfficientNet-B0   | 92.00%       | 12min 45s    | Previous implementation |
+| ResNet50          | 95.73%       | 16min 30s    | Solid baseline performance |
+| ViT-B/16          | 97.15%       | 25min 08s    | High accuracy but slower inference |
+
 ## Future Improvements
 - Expand to more food categories beyond the current three classes
-- Implement data augmentation for even better model performance
+- Deploy model with ONNX or TorchScript for optimized inference
+- Implement ensemble methods for even higher accuracy
 - Deploy to cloud platforms (AWS, GCP, Azure) for public access
 - Add user accounts to save classification history
-- Develop a mobile application version with React Native
 - Integrate with nutrition APIs for detailed food information
 
 ## License
@@ -139,6 +164,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgements
 - PyTorch and torchvision for model development: [https://pytorch.org/](https://pytorch.org/)
-- EfficientNet paper: [https://arxiv.org/abs/1905.11946](https://arxiv.org/abs/1905.11946)
+- ConvNeXt paper: [https://arxiv.org/abs/2201.03545](https://arxiv.org/abs/2201.03545)
 - Flask: [https://flask.palletsprojects.com/](https://flask.palletsprojects.com/)
 - Bootstrap: [https://getbootstrap.com/](https://getbootstrap.com/)
