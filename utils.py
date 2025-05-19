@@ -39,7 +39,7 @@ def load_model(model_path: str) -> torch.nn.Module:
 
     try:
         checkpoint = torch.load(model_path, map_location=device)
-        model.load_state_dict(checkpoint['model_state_dict'])  # 'model_state_dict' is your key
+        model.load_state_dict(checkpoint['model_state_dict'])  
         model.eval()
         print(f"Model loaded successfully from {model_path}")
         return model
