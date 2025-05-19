@@ -47,7 +47,7 @@ def load_model(model_path: str) -> torch.nn.Module:
         raise Exception(f"Error loading model: {e}")
 
 
-def predict_image(image_path: str, model: torch.nn.Module, confidence_threshold: float = 0.7):
+def predict_image(image_path: str, model: torch.nn.Module, confidence_threshold: float = 0.5):
     """
     Predicts the class of a single image using the provided model.
     """
